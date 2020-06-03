@@ -6,7 +6,6 @@ task:
       image_family: freebsd-13-0-snap
 #      image_family: freebsd-12-1
 #      image_family: freebsd-11-3-snap
-
   env:
     CIRRUS_CLONE_DEPTH: 1
     MAKE_FLAGS: -j 2
@@ -23,61 +22,14 @@ task:
     - echo ${LDFLAGS}
 
   pkginstall_script:
-    - pkg update -f
-    - pkg install -y ${PACKAGES}
+    echo "test line" >config.log
+    echo "line2" >qqq
 
-  manaplus_clone_script:
-    - git clone https://gitlab.com/manaplus/manaplus/
+  test_artifacts:
+    path: "config.log"
 
-  manaplus_build_script:
-    - cd manaplus
-    - ./tools/ci/jobs/clang.sh clang
-    - ./tools/ci/scripts/runtests.sh
-
-  evn_script:
-    - env
-
-task:
-  name: build_sdl2
-  timeout_in: 120m
-  freebsd_instance:
-    matrix:
-      # A stable 13.0 image likely won't be available before early 2021
-      image_family: freebsd-13-0-snap
-#      image_family: freebsd-12-1
-      # The stable 11.3 image causes "Agent is not responding" so use a snapshot
-#      image_family: freebsd-11-3-snap
-
-  env:
-    CIRRUS_CLONE_DEPTH: 1
-    MAKE_FLAGS: -j 2
-    PACKAGES: autoconf automake libtool pkgconf gcc libxml2 freetype2 png curl build xorg gettext gettext-tools git sdl2 sdl2_gfx sdl2_image sdl2_mixer sdl2_net sdl2_ttf git gdb valgrind
-    LDFLAGS: -L${LOCALBASE}/lib -lintl
-
-  first_script:
-    ./run.sh
-
-  check1_script:
-    - gcc --version || true
-    - clang --version || true
-    - echo ${LOCALBASE}
-    - echo ${LDFLAGS}
-
-  pkginstall_script:
-    - pkg update -f
-    - pkg install -y ${PACKAGES}
-
-  manaplus_clone_script:
-    - git clone https://gitlab.com/manaplus/manaplus/
-
-  manaplus_build_script:
-    - cd manaplus
-    - ./tools/ci/jobs/clang.sh clang
-    - ./tools/ci/scripts/runtests.sh
-
-  evn_script:
-    - env
-
+  all_artifacts:
+    path: "*"
 
 #task:
 #  name: Windows
