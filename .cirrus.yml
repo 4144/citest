@@ -1,0 +1,45 @@
+task:
+  name: FreeBSD
+  timeout_in: 120m
+  freebsd_instance:
+    matrix:
+      # A stable 13.0 image likely won't be available before early 2021
+      image_family: freebsd-13-0-snap
+#      image_family: freebsd-12-1
+      # The stable 11.3 image causes "Agent is not responding" so use a snapshot
+#      image_family: freebsd-11-3-snap
+
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+    MAKE_FLAGS: -j 2
+    PACKAGES: autoconf automake libtool pkgconf gcc textproc/libxml2 graphics/png ftp/curl build sdl xorg gettext gettext-tools
+# sdl2: sdl2 gfx2 image2 mixer2 net2 ttf2
+
+  first_script:
+    ./run.sh
+
+  check1_script:
+    - gcc --version || true
+    - clang --version || true
+
+  pkginstall_script:
+    - pkg update -f
+    - pkg install -y ${PACKAGES}
+
+  check2_script:
+    - gcc --version || true
+    - clang --version || true
+    - cc --version || true
+    - CC --version || true
+
+  evn_script:
+    - env
+
+
+#task:
+#  name: Windows
+#  windows_container:
+#    image: cirrusci/windowsservercore:2019
+#
+#  winfirst_script:
+#    dir
