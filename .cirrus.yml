@@ -1,5 +1,44 @@
 task:
-  name: FreeBSD
+  name: build
+  timeout_in: 120m
+  freebsd_instance:
+    matrix:
+      image_family: freebsd-13-0-snap
+#      image_family: freebsd-12-1
+#      image_family: freebsd-11-3-snap
+
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+    MAKE_FLAGS: -j 2
+    PACKAGES: autoconf automake libtool pkgconf gcc libxml2 freetype2 png curl build xorg gettext gettext-tools git sdl sdl_gfx sdl_image sdl_mixer sdl_net sdl_ttf git gdb valgrind
+    LDFLAGS: -L${LOCALBASE}/lib -lintl
+
+  first_script:
+    ./run.sh
+
+  check1_script:
+    - gcc --version || true
+    - clang --version || true
+    - echo ${LOCALBASE}
+    - echo ${LDFLAGS}
+
+  pkginstall_script:
+    - pkg update -f
+    - pkg install -y ${PACKAGES}
+
+  manaplus_clone_script:
+    - git clone https://gitlab.com/manaplus/manaplus/
+
+  manaplus_build_script:
+    - cd manaplus
+    - ./tools/ci/jobs/clang.sh clang
+    - ./tools/ci/scripts/runtests.sh
+
+  evn_script:
+    - env
+
+task:
+  name: build_sdl2
   timeout_in: 120m
   freebsd_instance:
     matrix:
@@ -12,8 +51,8 @@ task:
   env:
     CIRRUS_CLONE_DEPTH: 1
     MAKE_FLAGS: -j 2
-    PACKAGES: autoconf automake libtool pkgconf gcc textproc/libxml2 graphics/png ftp/curl build sdl xorg gettext gettext-tools
-# sdl2: sdl2 gfx2 image2 mixer2 net2 ttf2
+    PACKAGES: autoconf automake libtool pkgconf gcc libxml2 freetype2 png curl build xorg gettext gettext-tools git sdl2 sdl2_gfx sdl2_image sdl2_mixer sdl2_net sdl2_ttf git gdb valgrind
+    LDFLAGS: -L${LOCALBASE}/lib -lintl
 
   first_script:
     ./run.sh
@@ -21,16 +60,20 @@ task:
   check1_script:
     - gcc --version || true
     - clang --version || true
+    - echo ${LOCALBASE}
+    - echo ${LDFLAGS}
 
   pkginstall_script:
     - pkg update -f
     - pkg install -y ${PACKAGES}
 
-  check2_script:
-    - gcc --version || true
-    - clang --version || true
-    - cc --version || true
-    - CC --version || true
+  manaplus_clone_script:
+    - git clone https://gitlab.com/manaplus/manaplus/
+
+  manaplus_build_script:
+    - cd manaplus
+    - ./tools/ci/jobs/clang.sh clang
+    - ./tools/ci/scripts/runtests.sh
 
   evn_script:
     - env
